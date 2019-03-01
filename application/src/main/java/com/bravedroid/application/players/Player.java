@@ -18,4 +18,8 @@ public abstract class Player {
     }
 
     public abstract PlayAction play(TableCards tableCards);
+
+    protected void updateHandCards(Card card) {
+        handCards.remove(card);
+    }
 }

@@ -12,4 +12,8 @@ public class HandCards {
     public List<Card> getHandCardList() {
         return handCardList;
     }
+
+    public void remove(Card card) {
+        handCardList.remove(card);
+    }
 }

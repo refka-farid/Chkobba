@@ -18,7 +18,7 @@ import static com.bravedroid.application.players.PlayAction.Action.ONE_TO_MULTIP
 import static com.bravedroid.application.players.PlayAction.Action.ONE_TO_ONE_EAT;
 import static com.bravedroid.util.Helper.repeat;
 
-public class Game {
+public class Game implements Validator {
     private static Game instance;
     private Logger logger;
 
@@ -27,7 +27,6 @@ public class Game {
     private Player firstPlayer;
     private Player secondPlayer;
     private TableCards tableCards;
-    private PlayAction playAction;
 
     private Game() {
     }
@@ -56,7 +55,7 @@ public class Game {
     }
 
     private void createHumanPlayer(HumanUI humanUI) {
-        humanPlayer = new HumanPlayer(humanUI);
+        humanPlayer = new HumanPlayer(humanUI, this);
         secondPlayer = new BotPlayer();
     }
 
@@ -82,23 +81,23 @@ public class Game {
         Cards.getInstance().shuffle();
         final boolean isFirstCardAccepted = askFirstPlayerToAcceptFirstCard();
         giveFirstRoundCards(isFirstCardAccepted);
-        //playRound();
+        playRound();
         //giveNextRoundCards();
     }
 
-    private void playRound(PlayAction playAction) {
-        final List<Card> eatenCardsList = playAction.getEatenCardsList();
-        final Card selectedCardFromHandCards = playAction.getSelectedCardFromHandCards();
+    private void playRound() {
+      //  final List<Card> eatenCardsList = playAction.getEatenCardsList();
+      //  final Card selectedCardFromHandCards = playAction.getSelectedCardFromHandCards();
         repeat(() -> {
             final PlayAction action = firstPlayer.play(tableCards);
-            if (isValidate(action)) {
-                tableCards.getCardList().addAll(eatenCardsList);
-                tableCards.getCardList().add(selectedCardFromHandCards);
+            if (isValid(action)) {
+             //   tableCards.getCardList().addAll(eatenCardsList);
+             //   tableCards.getCardList().add(selectedCardFromHandCards);
             }
             secondPlayer.play(tableCards);
-            if (isValidate(action)) {
-                tableCards.getCardList().addAll(eatenCardsList);
-                tableCards.getCardList().add(selectedCardFromHandCards);
+            if (isValid(action)) {
+            //    tableCards.getCardList().addAll(eatenCardsList);
+            //    tableCards.getCardList().add(selectedCardFromHandCards);
             }
         }, 3);
     }
@@ -150,8 +149,8 @@ public class Game {
         return firstPlayer.acceptFirstCard(Cards.getInstance().getFirstCard());
     }
 
-    public boolean isValidate(PlayAction playAction) {
-
+    @Override
+    public boolean isValid(PlayAction playAction) {
         switch (playAction.getAction()) {
             case ONE_TO_ONE_EAT:
                 final List<Card> eatenCardsList = playAction.getEatenCardsList();

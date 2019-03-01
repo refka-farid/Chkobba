@@ -2,7 +2,9 @@ package com.bravedroid.application;
 
 import com.bravedroid.application.players.PlayAction;
 import com.bravedroid.domain.Card;
+import com.bravedroid.domain.HandCards;
 import com.bravedroid.domain.TableCards;
+import com.bravedroid.util.Logger;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -21,6 +23,17 @@ public class GameTest {
     @Before
     public void setUp() {
         SUT = Game.getInstance();
+        SUT.initialize(new HumanUI() {
+            @Override
+            public boolean acceptFirstCard(Card firstCard) {
+                return false;
+            }
+
+            @Override
+            public PlayAction play(TableCards tableCards, HandCards handCards) {
+                return null;
+            }
+        }, new Logger(true));
     }
 
     @Test
@@ -67,7 +80,7 @@ public class GameTest {
 
     private void should_validate_one_to_one_eat(Card handCard, PlayAction.Action action, List<Card> eatenCardList) {
         final PlayAction eatAction = PlayAction.createEatAction(handCard, action, eatenCardList);
-        final boolean validate = SUT.isValidate(eatAction);
+        final boolean validate = SUT.isValid(eatAction);
         assertTrue(validate);
     }
 
@@ -75,6 +88,6 @@ public class GameTest {
         final TableCards tableCards = SUT.getTableCards();
         tableCards.takeCards(tableCardList);
         final PlayAction throwAction = PlayAction.createThrowAction(handCard);
-        assertThat(isValid, is(equalTo(SUT.isValidate(throwAction))));
+        assertThat(isValid, is(equalTo(SUT.isValid(throwAction))));
     }
 }
