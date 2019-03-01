@@ -27,6 +27,6 @@ public class HumanPlayer extends Player {
     }
 
     private boolean isValid(PlayAction playAction) {
-        return Game.getInstance(null, null).isValidate(playAction);
+        return Game.getInstance().isValidate(playAction);
     }
 }

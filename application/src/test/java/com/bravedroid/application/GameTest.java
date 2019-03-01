@@ -3,7 +3,6 @@ package com.bravedroid.application;
 import com.bravedroid.application.players.PlayAction;
 import com.bravedroid.domain.Card;
 import com.bravedroid.domain.TableCards;
-import com.bravedroid.util.Logger;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -21,7 +20,7 @@ public class GameTest {
 
     @Before
     public void setUp() {
-        SUT = Game.getInstance(new Logger(true), null);
+        SUT = Game.getInstance();
     }
 
     @Test

@@ -29,14 +29,12 @@ public class Game {
     private TableCards tableCards;
     private PlayAction playAction;
 
-    private Game(Logger logger, HumanUI humanUI) {
-        this.logger = logger;
-        init(humanUI);
+    private Game() {
     }
 
-    public static Game getInstance(Logger logger, HumanUI humanUI) {
+    public static Game getInstance() {
         if (instance == null) {
-            instance = new Game(logger, humanUI);
+            instance = new Game();
         }
         return instance;
     }
@@ -45,7 +43,8 @@ public class Game {
         return tableCards;
     }
 
-    private void init(HumanUI humanUI) {
+    public void initialize(HumanUI humanUI, Logger logger) {
+        this.logger = logger;
         createHumanPlayer(humanUI);
         createBotPlayer();
         createTableCards();
@@ -227,7 +226,10 @@ public class Game {
                 return
                         hasSumByTuple2(intList, x) || hasSumByTuple3(intList, x) || hasSumByTuple4(intList, x)
                                 || hasSumByTuple5(intList, x) || hasSumByTuple6(intList, x);
-            case 7: case 8: case 9: case 10:
+            case 7:
+            case 8:
+            case 9:
+            case 10:
                 return
                         hasSumByTuple2(intList, x) || hasSumByTuple3(intList, x) || hasSumByTuple4(intList, x)
                                 || hasSumByTuple5(intList, x) || hasSumByTuple6(intList, x) || hasSumByTuple7(intList, x);

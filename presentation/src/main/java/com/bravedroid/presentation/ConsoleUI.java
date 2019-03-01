@@ -18,7 +18,9 @@ public class ConsoleUI implements HumanUI {
     }
 
     public void showGame() {
-        Game.getInstance(logger, this).start();
+        final Game gameInstance = Game.getInstance();
+        gameInstance.start();
+        gameInstance.initialize(this, logger);
     }
 
     @Override
