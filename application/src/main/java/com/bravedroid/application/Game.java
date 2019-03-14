@@ -4,29 +4,23 @@ import com.bravedroid.application.players.BotPlayer;
 import com.bravedroid.application.players.HumanPlayer;
 import com.bravedroid.application.players.PlayAction;
 import com.bravedroid.application.players.Player;
-import com.bravedroid.domain.Card;
-import com.bravedroid.domain.Cards;
-import com.bravedroid.domain.HandCards;
-import com.bravedroid.domain.TableCards;
+import com.bravedroid.domain.*;
 import com.bravedroid.util.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
-import static com.bravedroid.application.players.PlayAction.Action.ONE_TO_MULTIPLE_EAT;
-import static com.bravedroid.application.players.PlayAction.Action.ONE_TO_ONE_EAT;
+import static com.bravedroid.application.players.PlayAction.Action.*;
 import static com.bravedroid.util.Helper.repeat;
 
 public class Game implements Validator {
     private static Game instance;
     private Logger logger;
-
     private HumanPlayer humanPlayer;
     private BotPlayer botPlayer;
     private Player firstPlayer;
     private Player secondPlayer;
     private TableCards tableCards;
+    private Map<Player, Score> scoreMap;
 
     private Game() {
     }
@@ -46,8 +40,15 @@ public class Game implements Validator {
         this.logger = logger;
         createHumanPlayer(humanUI);
         createBotPlayer();
+        createScoreMap();
         createTableCards();
         selectFirstPlayer();
+    }
+
+    private void createScoreMap() {
+        scoreMap = new HashMap<>();
+        scoreMap.put(firstPlayer, new Score());
+        scoreMap.put(secondPlayer, new Score());
     }
 
     private void createTableCards() {
@@ -86,20 +87,47 @@ public class Game implements Validator {
     }
 
     private void playRound() {
-      //  final List<Card> eatenCardsList = playAction.getEatenCardsList();
-      //  final Card selectedCardFromHandCards = playAction.getSelectedCardFromHandCards();
+        //  final List<Card> eatenCardsList = playAction.getEatenCardsList();
+        //  final Card selectedCardFromHandCards = playAction.getSelectedCardFromHandCards();
         repeat(() -> {
             final PlayAction action = firstPlayer.play(tableCards);
             if (isValid(action)) {
-             //   tableCards.getCardList().addAll(eatenCardsList);
-             //   tableCards.getCardList().add(selectedCardFromHandCards);
+                //updateTable ()
+                updateScore(firstPlayer, action);
             }
             secondPlayer.play(tableCards);
             if (isValid(action)) {
-            //    tableCards.getCardList().addAll(eatenCardsList);
-            //    tableCards.getCardList().add(selectedCardFromHandCards);
+                //    tableCards.getCardList().addAll(eatenCardsList);
+                //    tableCards.getCardList().add(selectedCardFromHandCards);
             }
         }, 3);
+    }
+
+    private void updateScore(Player player, PlayAction playAction) {
+        if (playAction.getAction() != THROW_CARD) {
+            Score score = scoreMap.get(player);
+            final Card selectedCardFromHandCards = playAction.getSelectedCardFromHandCards();
+            final List<Card> eatenCardsList = playAction.getEatenCardsList();
+            final List<Card> allEatenCardsList = new ArrayList<>();
+            allEatenCardsList.add(selectedCardFromHandCards);
+            allEatenCardsList.addAll(eatenCardsList);
+
+            for (Card card : allEatenCardsList) {
+                if (Rules.isDinery(card)) {
+                    score.dinaryCount += 1;
+                }
+                if (Rules.isBermila(card)) {
+                    score.bermilaCount += 1;
+                }
+                if (Rules.isSabaaHaya(card)) {
+                    score.hasSabaHaya = true;
+                }
+            }
+            score.cartaCount += allEatenCardsList.size();
+            if (tableCards.isEmpty()) {
+                score.chkobbaCount += 1;
+            }
+        }
     }
 
     private void giveFirstRoundCards(boolean isFirstCardAccepted) {

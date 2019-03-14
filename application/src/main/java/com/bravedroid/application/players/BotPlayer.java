@@ -39,7 +39,6 @@ public class BotPlayer extends Player {
                 }
             }
         }
-        //   throw new NotImplementedException();
         updateHandCards(playAction.getSelectedCardFromHandCards());
         return playAction;
     }

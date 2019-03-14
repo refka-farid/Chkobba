@@ -5,10 +5,13 @@ import java.util.Objects;
 public class Card {
     private CardType type;
     private int value;
-
     private Card(CardType type, int value) {
         this.type = type;
         this.value = value;
+    }
+
+    public CardType getType() {
+        return type;
     }
 
     public int getValue() {
@@ -37,6 +40,10 @@ public class Card {
                 '}';
     }
 
+    public static enum CardType {
+        PIQUE, COEUR, CARREAU, TREFLE;
+    }
+
     public static class Factory {
         public static Card create(CardType type, int value) {
             if (value <= 0 || value > 10) {
@@ -44,9 +51,5 @@ public class Card {
             }
             return new Card(type, value);
         }
-    }
-
-    public static enum CardType {
-        PIQUE, COEUR, CARREAU, TREFLE;
     }
 }
