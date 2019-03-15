@@ -45,4 +45,11 @@ public class ScoreRecorder {
             score.chkobbaCount += 1;
         }
     }
+
+    public void calculateTotalScore(List<Player> listPlayer) {
+        for (Player player : listPlayer) {
+            Score score = scoreMap.get(player);
+            score.calculateTotalScore();
+        }
+    }
 }

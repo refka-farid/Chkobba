@@ -82,7 +82,11 @@ public class Game implements Validator {
         final boolean isFirstCardAccepted = askFirstPlayerToAcceptFirstCard();
         giveFirstRoundCards(isFirstCardAccepted);
         playRound();
-        //giveNextRoundCards();
+        for (int i = 0; i < 5; i++) {
+            giveNextRoundCards(i);
+            playRound();
+        }
+        scoreRecorder.calculateTotalScore(listPlayer);
     }
 
     private void playRound() {
@@ -143,20 +147,18 @@ public class Game implements Validator {
         logger.log("second player cards " + secondPlayerCardList);
     }
 
-    //private void giveNextRoundCards() {
-    //    final ArrayList<Card> cardList = new ArrayList<>();
-    //    int round = 0;
-    //    int startIndex = 7;
-    //    final int count = 3;
-    //    while (round < 5) {
-    //        cardList.addAll(Cards.getInstance().getCardsRange(startIndex, count));
-    //        firstPlayer.takeHandCards(new HandCards(cardList));
-    //        startIndex += 3;
-    //        cardList.addAll(Cards.getInstance().getCardsRange(startIndex, count));
-    //        secondPlayer.takeHandCards(new HandCards(cardList));
-    //        round++;
-    //    }
-    //}
+    private void giveNextRoundCards(int indexRound) {
+        Player firstPlayer = listPlayer.get(0);
+        Player secondPlayer = listPlayer.get(1);
+
+        int startIndex = 10 + 6 * indexRound;
+        final int count = 3;
+        List<Card> firstPlayerCardList = Cards.getInstance().getCardsRange(startIndex, count);
+        firstPlayer.takeHandCards(new HandCards(firstPlayerCardList));
+        startIndex += 3;
+        List<Card> secondPlayerCardList = Cards.getInstance().getCardsRange(startIndex, count);
+        secondPlayer.takeHandCards(new HandCards(secondPlayerCardList));
+    }
 
     private boolean askFirstPlayerToAcceptFirstCard() {
         Player firstPlayer = listPlayer.get(0);
