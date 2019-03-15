@@ -167,28 +167,37 @@ public class Game implements Validator {
 
     @Override
     public boolean isValid(PlayAction playAction) {
-        List<Card> eatenCardsList;
         Card selectedCardFromHandCards;
+        List<Card> eatenCardsList;
         switch (playAction.getAction()) {
             case ONE_TO_ONE_EAT:
-                eatenCardsList = playAction.getEatenCardsList();
                 selectedCardFromHandCards = playAction.getSelectedCardFromHandCards();
+                eatenCardsList = playAction.getEatenCardsList();
+
                 return (eatenCardsList.get(0).getValue() == selectedCardFromHandCards.getValue());
             case ONE_TO_MULTIPLE_EAT:
-                eatenCardsList = playAction.getEatenCardsList();
                 selectedCardFromHandCards = playAction.getSelectedCardFromHandCards();
-                final int sumValueCards = CardUtils.getSumValueCards(eatenCardsList);
-                return sumValueCards == selectedCardFromHandCards.getValue();
+                eatenCardsList = playAction.getEatenCardsList();
+                int sumValueCards = CardUtils.getSumValueCards(eatenCardsList);
+
+                return !canEatOneToOne(tableCards, selectedCardFromHandCards.getValue())
+                        && sumValueCards == selectedCardFromHandCards.getValue();
             case THROW_CARD:
-                if (tableCards.getCardList().isEmpty()) {
-                    return true;
-                }
-                return !findSumOfItemsFromList(tableCards.getCardList(), playAction.getSelectedCardFromHandCards());
+                return tableCards.getCardList().isEmpty()
+                        || !canEatCards(tableCards.getCardList(), playAction.getSelectedCardFromHandCards());
         }
         throw new IllegalArgumentException();
     }
 
-    private boolean findSumOfItemsFromList(List<Card> cardList, Card thrownCard) {
+    private boolean canEatOneToOne(TableCards tableCards, int cardValue) {
+        boolean canEatOneToOne = false;
+        for (Card element : tableCards.getCardList()) {
+            canEatOneToOne = element.getValue() == cardValue;
+        }
+        return canEatOneToOne;
+    }
+
+    private boolean canEatCards(List<Card> cardList, Card thrownCard) {
         final List<Integer> integerList = mapFromListOfCardToIntegerList(cardList);
         return hasSum(integerList, thrownCard.getValue());
     }
