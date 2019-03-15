@@ -1,4 +1,4 @@
-package com.bravedroid.application;
+package com.bravedroid.domain;
 
 public class Score {
     public int dinaryCount;

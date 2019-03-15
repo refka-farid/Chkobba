@@ -4,10 +4,15 @@ import com.bravedroid.application.players.BotPlayer;
 import com.bravedroid.application.players.HumanPlayer;
 import com.bravedroid.application.players.PlayAction;
 import com.bravedroid.application.players.Player;
-import com.bravedroid.domain.*;
+import com.bravedroid.domain.Card;
+import com.bravedroid.domain.Cards;
+import com.bravedroid.domain.HandCards;
+import com.bravedroid.domain.TableCards;
 import com.bravedroid.util.Logger;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 import static com.bravedroid.application.players.PlayAction.Action.*;
 import static com.bravedroid.util.Helper.repeat;
@@ -20,7 +25,7 @@ public class Game implements Validator {
     private Player firstPlayer;
     private Player secondPlayer;
     private TableCards tableCards;
-    private Map<Player, Score> scoreMap;
+    private ScoreRecorder scoreRecorder;
 
     private Game() {
     }
@@ -40,15 +45,13 @@ public class Game implements Validator {
         this.logger = logger;
         createHumanPlayer(humanUI);
         createBotPlayer();
-        createScoreMap();
+        createScoreRecorder();
         createTableCards();
         selectFirstPlayer();
     }
 
-    private void createScoreMap() {
-        scoreMap = new HashMap<>();
-        scoreMap.put(firstPlayer, new Score());
-        scoreMap.put(secondPlayer, new Score());
+    private void createScoreRecorder() {
+        scoreRecorder = new ScoreRecorder(firstPlayer, secondPlayer);
     }
 
     private void createTableCards() {
@@ -87,46 +90,34 @@ public class Game implements Validator {
     }
 
     private void playRound() {
-        //  final List<Card> eatenCardsList = playAction.getEatenCardsList();
-        //  final Card selectedCardFromHandCards = playAction.getSelectedCardFromHandCards();
         repeat(() -> {
-            final PlayAction action = firstPlayer.play(tableCards);
-            if (isValid(action)) {
-                //updateTable ()
-                updateScore(firstPlayer, action);
+            final PlayAction actionPlayer1 = firstPlayer.play(tableCards);
+            if (isValid(actionPlayer1)) {
+                updateTableCards(actionPlayer1);
+                updateScore(firstPlayer, actionPlayer1);
             }
-            secondPlayer.play(tableCards);
-            if (isValid(action)) {
-                //    tableCards.getCardList().addAll(eatenCardsList);
-                //    tableCards.getCardList().add(selectedCardFromHandCards);
+
+            final PlayAction actionPlayer2 = secondPlayer.play(tableCards);
+            if (isValid(actionPlayer2)) {
+                updateTableCards(actionPlayer2);
+                updateScore(secondPlayer, actionPlayer2);
             }
         }, 3);
     }
 
+    private void updateTableCards(PlayAction action) {
+        final List<Card> eatenCardsListPlayer = action.getEatenCardsList();
+        final Card selectedCardFromPlayerHandCards = action.getSelectedCardFromHandCards();
+        if (action.getAction() != THROW_CARD) {
+            tableCards.getCardList().removeAll(eatenCardsListPlayer);
+        } else {
+            tableCards.getCardList().add(selectedCardFromPlayerHandCards);
+        }
+    }
+
     private void updateScore(Player player, PlayAction playAction) {
         if (playAction.getAction() != THROW_CARD) {
-            Score score = scoreMap.get(player);
-            final Card selectedCardFromHandCards = playAction.getSelectedCardFromHandCards();
-            final List<Card> eatenCardsList = playAction.getEatenCardsList();
-            final List<Card> allEatenCardsList = new ArrayList<>();
-            allEatenCardsList.add(selectedCardFromHandCards);
-            allEatenCardsList.addAll(eatenCardsList);
-
-            for (Card card : allEatenCardsList) {
-                if (Rules.isDinery(card)) {
-                    score.dinaryCount += 1;
-                }
-                if (Rules.isBermila(card)) {
-                    score.bermilaCount += 1;
-                }
-                if (Rules.isSabaaHaya(card)) {
-                    score.hasSabaHaya = true;
-                }
-            }
-            score.cartaCount += allEatenCardsList.size();
-            if (tableCards.isEmpty()) {
-                score.chkobbaCount += 1;
-            }
+            scoreRecorder.updateScore(player, playAction, tableCards);
         }
     }
 
