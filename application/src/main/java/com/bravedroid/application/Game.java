@@ -8,6 +8,7 @@ import com.bravedroid.domain.*;
 import com.bravedroid.util.Logger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -17,10 +18,11 @@ import static com.bravedroid.util.Helper.repeat;
 public class Game implements Validator {
     private static Game instance;
     private Logger logger;
+
     private HumanPlayer humanPlayer;
     private BotPlayer botPlayer;
-    private Player firstPlayer;
-    private Player secondPlayer;
+    private List<Player> listPlayer;
+
     private TableCards tableCards;
     private ScoreRecorder scoreRecorder;
 
@@ -42,22 +44,13 @@ public class Game implements Validator {
         this.logger = logger;
         createHumanPlayer(humanUI);
         createBotPlayer();
+        selectFirstPlayer();
         createScoreRecorder();
         createTableCards();
-        selectFirstPlayer();
-    }
-
-    private void createScoreRecorder() {
-        scoreRecorder = new ScoreRecorder(firstPlayer, secondPlayer);
-    }
-
-    private void createTableCards() {
-        tableCards = new TableCards();
     }
 
     private void createHumanPlayer(HumanUI humanUI) {
         humanPlayer = new HumanPlayer(humanUI, this);
-        secondPlayer = new BotPlayer();
     }
 
     private void createBotPlayer() {
@@ -68,14 +61,20 @@ public class Game implements Validator {
         Random rand = new Random();
         int randomInt = rand.nextInt(10);
         if (randomInt % 2 == 0) {
-            firstPlayer = humanPlayer;
-            secondPlayer = botPlayer;
+            listPlayer = Arrays.asList(humanPlayer, botPlayer);
             logger.log("first player is human ");
         } else {
-            firstPlayer = botPlayer;
-            secondPlayer = humanPlayer;
+            listPlayer = Arrays.asList(botPlayer, humanPlayer);
             logger.log("first player is bot ");
         }
+    }
+
+    private void createScoreRecorder() {
+        scoreRecorder = new ScoreRecorder(listPlayer);
+    }
+
+    private void createTableCards() {
+        tableCards = new TableCards();
     }
 
     public void start() {
@@ -88,16 +87,12 @@ public class Game implements Validator {
 
     private void playRound() {
         repeat(() -> {
-            final PlayAction actionPlayer1 = firstPlayer.play(tableCards);
-            if (isValid(actionPlayer1)) {
-                updateTableCards(actionPlayer1);
-                updateScore(firstPlayer, actionPlayer1);
-            }
-
-            final PlayAction actionPlayer2 = secondPlayer.play(tableCards);
-            if (isValid(actionPlayer2)) {
-                updateTableCards(actionPlayer2);
-                updateScore(secondPlayer, actionPlayer2);
+            for (Player player : listPlayer) {
+                final PlayAction playAction = player.play(tableCards);
+                if (isValid(playAction)) {
+                    updateTableCards(playAction);
+                    updateScore(player, playAction);
+                }
             }
         }, 3);
     }
@@ -119,6 +114,8 @@ public class Game implements Validator {
     }
 
     private void giveFirstRoundCards(boolean isFirstCardAccepted) {
+        Player firstPlayer = listPlayer.get(0);
+        Player secondPlayer = listPlayer.get(1);
         List<Card> firstPlayerCardList = new ArrayList<>();
         List<Card> secondPlayerCardList;
         List<Card> tableCardList = new ArrayList<>();
@@ -162,6 +159,7 @@ public class Game implements Validator {
     //}
 
     private boolean askFirstPlayerToAcceptFirstCard() {
+        Player firstPlayer = listPlayer.get(0);
         return firstPlayer.acceptFirstCard(Cards.getInstance().getFirstCard());
     }
 

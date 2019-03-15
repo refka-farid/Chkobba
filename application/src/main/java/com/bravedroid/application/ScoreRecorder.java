@@ -15,10 +15,10 @@ import java.util.Map;
 public class ScoreRecorder {
     private Map<Player, Score> scoreMap;
 
-    public ScoreRecorder(Player firstPlayer, Player secondPlayer) {
+    public ScoreRecorder(List<Player> listPlayer) {
         scoreMap = new HashMap<>();
-        scoreMap.put(firstPlayer, new Score());
-        scoreMap.put(secondPlayer, new Score());
+        scoreMap.put(listPlayer.get(0), new Score());
+        scoreMap.put(listPlayer.get(1), new Score());
     }
 
     public void updateScore(Player player, PlayAction playAction, TableCards tableCards) {
