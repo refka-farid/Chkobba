@@ -4,17 +4,14 @@ import com.bravedroid.application.players.BotPlayer;
 import com.bravedroid.application.players.HumanPlayer;
 import com.bravedroid.application.players.PlayAction;
 import com.bravedroid.application.players.Player;
-import com.bravedroid.domain.Card;
-import com.bravedroid.domain.Cards;
-import com.bravedroid.domain.HandCards;
-import com.bravedroid.domain.TableCards;
+import com.bravedroid.domain.*;
 import com.bravedroid.util.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static com.bravedroid.application.players.PlayAction.Action.*;
+import static com.bravedroid.application.players.PlayAction.Action.THROW_CARD;
 import static com.bravedroid.util.Helper.repeat;
 
 public class Game implements Validator {
@@ -170,33 +167,18 @@ public class Game implements Validator {
 
     @Override
     public boolean isValid(PlayAction playAction) {
+        List<Card> eatenCardsList;
+        Card selectedCardFromHandCards;
         switch (playAction.getAction()) {
             case ONE_TO_ONE_EAT:
-                final List<Card> eatenCardsList = playAction.getEatenCardsList();
-                final Card selectedCardFromHandCards = playAction.getSelectedCardFromHandCards();
-                int eatenSumCards = 0;
-                for (Card card : eatenCardsList) {
-                    eatenSumCards += card.getValue();
-                }
-                final boolean isValidOneByOneEat = playAction.getAction().equals(ONE_TO_ONE_EAT)
-                        && (eatenCardsList.get(0).getValue() == selectedCardFromHandCards.getValue());
-                if (isValidOneByOneEat) {
-                    return true;
-                }
-                break;
+                eatenCardsList = playAction.getEatenCardsList();
+                selectedCardFromHandCards = playAction.getSelectedCardFromHandCards();
+                return (eatenCardsList.get(0).getValue() == selectedCardFromHandCards.getValue());
             case ONE_TO_MULTIPLE_EAT:
-                final List<Card> eatenCardsListMultiple = playAction.getEatenCardsList();
-                final Card selectedCardFromHandCards2 = playAction.getSelectedCardFromHandCards();
-                int eatenSumCards2 = 0;
-                for (Card card : eatenCardsListMultiple) {
-                    eatenSumCards2 += card.getValue();
-                }
-                final boolean isValidOneToMultipleEat = playAction.getAction().equals(ONE_TO_MULTIPLE_EAT)
-                        && eatenCardsListMultiple.size() > 1 && eatenSumCards2 == selectedCardFromHandCards2.getValue();
-                if (isValidOneToMultipleEat) {
-                    return true;
-                }
-                break;
+                eatenCardsList = playAction.getEatenCardsList();
+                selectedCardFromHandCards = playAction.getSelectedCardFromHandCards();
+                final int sumValueCards = CardUtils.getSumValueCards(eatenCardsList);
+                return sumValueCards == selectedCardFromHandCards.getValue();
             case THROW_CARD:
                 if (tableCards.getCardList().isEmpty()) {
                     return true;
